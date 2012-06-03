@@ -1,0 +1,72 @@
+.shadowed {
+    -moz-box-shadow: 2px 2px 3px #000;
+    -webkit-box-shadow: 2px 2px 3px #000;
+    box-shadow: 2px 2px 3px #000;
+}
+
+.rounded-corners {
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -khtml-border-radius: 5px;
+    border-radius: 5px;
+}
+
+#root-container {
+    /*padding: 20px 20px 20px 20px;*/
+}
+
+#restaurant-info-wrapper {
+    
+}
+
+#restaurant-wrapper {
+    width: 70%;
+    float: left;
+}
+
+#info-wrapper {
+    width: 20%;
+    float: right;
+    margin: 0;
+}
+
+label[for="form-time"] {
+    float: left;
+}
+
+#form-time {
+    clear: left;
+}
+
+#todays-votes-wrapper {
+
+}
+
+#todays-votes {
+    float: left;
+    width: auto;
+}
+
+#refresh {
+    width: 40px;
+    height: 40px;
+    background-color: #336699;
+    background-image: url('refresh.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 80%;
+    float: right;
+    margin-top: 10px;
+
+    border-width: 1px;
+    border-style: solid;
+    border-color: #246;
+}
+
+#diners {
+    clear: left;
+}
+
+#diners p {
+    color: #6699cc;
+}

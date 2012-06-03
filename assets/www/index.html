@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="view-port" content="width=device-width, initial-scale=1, charset=UTF-8" http-equiv="Content-Type" />
+    <title>Safkavaalit</title>
+    <link rel="stylesheet" href="jquery.mobile-1.1.0.min.css" />
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+    <script src="cordova-1.6.0.js"></script>
+    <script src="jquery-1.7.1.min.js"></script>
+    <script src="jquery.mobile-1.1.0.min.js"></script>
+    <script src="spin.min.js"></script>
+    <script src="restaurant.js"></script>
+    <script>
+      if (typeof restaurants === "undefined") {
+        restaurants = [];
+        restaurants.push(new Restaurant("alvari","Alvari", {"lat": 0.0, "lon": 0.0}, {"start": "10.30", "end": "17.00"}));
+        restaurants.push(new Restaurant("kvarkki","Kvarkki", {"lat": 0.0, "lon": 0.0}, {"start": "10.30", "end": "17.00"}));
+        restaurants.push(new Restaurant("taffa","Täffä", {"lat": 0.0, "lon": 0.0}, {"start": "10.30", "end": "17.00"}));
+        restaurants.push(new Restaurant("t-talo","T-talo", {"lat": 0.0, "lon": 0.0}, {"start": "10.30", "end": "17.00"}));
+        restaurants.push(new Restaurant("tuas-talo","TUAS-talo", {"lat": 0.0, "lon": 0.0}, {"start": "10.30", "end": "17.00"}));
+        restaurants.push(new Restaurant("dipoli","Dipoli", {"lat": 0.0, "lon": 0.0}, {"start": "10.30", "end": "17.00"}));
+      }
+
+      var remoteUrl = "http://82.181.220.67:8888"
+
+      function handleResponse(data) {
+            var diners = $.parseJSON(data);
+ 
+            var dinersHtml = "";
+            for (i in diners) {
+              var diner = diners[i];
+              dinersHtml += diner.name + ": " + idToName(diner.restaurant) + " klo " + diner.time + "<br>";
+            }
+    if (dinersHtml != "")
+    $('#diners p').html(dinersHtml);
+    else
+    $('#diners p').html("Ei ääniä vielä.");
+
+      stopSpin();
+      }
+
+      function fetchTodaysVotes() {
+        startSpin();
+
+        $.ajax({
+          url: remoteUrl,
+          jsonpCallback: "handleResponse",
+          cache: false,
+          timeout: 1000,
+          dataType: "jsonp",
+          error: function(request, status, error) {
+            stopSpin();
+            $('#diners p').html("Haku epäonnistui. Palvelin on alhaalla tai internet-yhteydessäsi on vikaa.");
+          }
+        });
+      }
+
+      function sendForm() {
+        startSpin();
+
+        var body = $('#vote-form').serialize();
+
+        $.ajax({
+          url: remoteUrl + "/?" + body,
+          jsonCallback: "handleResponse",
+          cache: false,
+          timeout: 1000,
+          dataType: "jsonp",
+          error: function(request, status, error) {
+            stopSpin();
+          }
+        });
+      }
+
+      var spinner = new Spinner(opts);      
+
+      function startSpin() {
+        spinner.spin(document.getElementById('page'));      
+      }
+
+      function stopSpin() {
+        spinner.stop();
+      }
+
+      $(document).ready(function() {
+        document.addEventListener("deviceready", onDeviceReady, false);
+      
+      var optionsStr = "<select data-native-menu=\"false\" name=\"restaurant\" id=\"form-restaurant\">";
+      for (var i = 0; i < restaurants.length; i++) {
+			  var r = restaurants[i];
+			  optionsStr += "<option value=\"" + r.id + "\">" + r.name + "</option>\n";
+			  }
+			  optionsStr += "<option value=\"other\">Muu</option>";
+			  optionsStr += "</select>";
+	$('#restaurant-wrapper').html(optionsStr);
+
+        fetchTodaysVotes();
+
+			  $('#refresh').bind('click', function(event, ui) {
+			    fetchTodaysVotes();
+			  });
+
+        $('#form-submit').bind('click', function(event, ui) {
+          event.preventDefault();
+
+          var validName = /^[a-zA-Z0-9ÄäÖöÅå_\s]{1,25}$/;
+          var validTime = /^(([0-9])|([0-1][0-9])|([2][0-3]))(\.|\:)(([0-9])|([0-5][0-9]))$/;
+
+          if (!$('#form-time').val().match(validTime)) {
+            alert("Kirjoita aika muodossa hh.mm.");
+            return;
+          }
+
+          if (!$('#form-name').val().trim().match(validName)) {
+            alert("Nimessä saa olla vain kirjaimia ja numeroita.");
+            return;
+          }
+
+          sendForm();
+        });
+
+      });
+
+      function onDeviceReady() {
+			  
+      }
+    </script>
+  </head>
+
+<body onload="onLoad()">
+  <div id="page" data-role="page" data-theme="a">
+    <div data-role="header" data-position="fixed">
+      <h2>Safkavaalit</h2>
+    </div>
+    
+    <div data-role="content">
+      <a id="button-dishes" data-role="button" href="http://ruokalistat.net">Päivän ruoat</a>
+
+      <div id="todays-votes-wrapper">
+	<div id="todays-votes">
+	  <h3>Päivän äänet</h3>
+	</div>
+	<div id="refresh" class="shadowed rounded-corners">
+	</div>
+      </div>
+
+      <div id="diners">
+	<p></p>
+      </div>
+
+      <h3>Mitä sinä suosittelet?</h3>
+ 
+      <form id="vote-form">
+	<div id="restaurant-info-wrapper">
+	  <div id="restaurant-wrapper">
+	  </div>
+	  <!-- <a href="info.htm" data-role="button" id="info-wrapper" data-prefetch>i</a> -->
+	</div>
+
+	<div data-role="fieldcontain">
+	  <label for="form-time">Milloin?</label>
+	  <input id="form-time" type="time", name="time" value="11.30" />
+	</div>
+	
+	<div data-role="fieldcontain">
+	  <label for="form-name">Nimesi</label>
+	  <input id="form-name" type="text" name="name" />
+	</div>
+	
+	<div>
+	  <input type="submit" value="Äänestä!" id="form-submit" />
+	</div>
+      </form>
+    </div> <!-- content -->
+  </div> <!-- page -->
+</body>
+</html>
